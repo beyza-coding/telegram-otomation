@@ -1,1 +1,30 @@
-
+name: BayMavi Telegram Poster
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Istanbul
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Postu gonder
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        run: python telegram_poster.py
+      - name: Durumu kaydet
+        run: |
+          git config user.name "baymavi-bot"
+          git config user.email "bot@baymavi.local"
+          git add sent.log last_send.txt poster.log 2>/dev/null || true
+          git commit -m "durum" || echo "yok"
+          git push || echo "yok"
