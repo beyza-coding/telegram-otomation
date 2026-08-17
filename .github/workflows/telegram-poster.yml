@@ -1,0 +1,29 @@
+name: BayMavi Telegram Poster
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
+permissions:
+  contents: write
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Istanbul
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - working-directory: github-deploy
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        run: python telegram_poster.py
+      - run: |
+          git config user.name bot
+          git config user.email bot@baymavi.local
+          git add -A
+          git commit -m durum || echo yok
+          git push || echo yok
